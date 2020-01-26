@@ -8,6 +8,8 @@ class AnswerSchema extends Schema {
     this.create('answers', (table) => {
       table.increments()
       table.string('text')
+      table.integer('question_id').unsigned().index('question_id')
+      table.foreign('question_id').references('questions.id')
       table.boolean('correct')
       table.timestamps()
     })
