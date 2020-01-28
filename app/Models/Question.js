@@ -13,6 +13,7 @@ class Question extends Model {
     return this.hasMany('App/Models/Answer')
   }
 
+
   static getRandomQuestion() {
     let arr = [];
 
