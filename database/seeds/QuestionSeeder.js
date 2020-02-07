@@ -37,7 +37,6 @@ class QuestionSeeder {
     }
 
     const q = await Question.all()
-    console.log(q.toJSON());
   }
 }
 
