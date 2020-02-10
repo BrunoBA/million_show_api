@@ -5,7 +5,7 @@ const Question = use('App/Models/Question')
 
 const { test } = use('Test/Suite')('Answer')
 
-test('Only one correct answer', async ({ assert }) => {
+test('Only one correct answer ', async ({ assert }) => {
 
   const answer = await Answer.all()
   const question = await Question.all()
