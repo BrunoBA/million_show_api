@@ -26,10 +26,10 @@ class Question extends Model {
     return arr
   }
 
-  static async getQuestions() {
+  static async getQuestions(arrayQuestions) {
     const Question = use('App/Models/Question')
     const questions = await Question.query()
-      .whereIn('id', Question.getRandomQuestion()).with('answers').fetch()
+      .whereIn('id', arrayQuestions).with('answers').fetch()
 
     return questions.toJSON()
   }

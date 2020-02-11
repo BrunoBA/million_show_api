@@ -17,3 +17,4 @@
 const Route = use('Route')
 
 Route.get('/', 'QuestionController.index')
+Route.get('/questions/:questionsHash', 'QuestionController.show')
