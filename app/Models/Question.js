@@ -3,6 +3,9 @@
 /** @type {typeof import('@adonisjs/lucid/src/Lucid/Model')} */
 const Model = use('Model')
 const CONSTANTS_QUESTION = use('App/Constants/Question')
+const Cryptr = require('cryptr')
+const Env = use('Env')
+const cryptr = new Cryptr(Env.get('APP_KEY'))
 
 class Question extends Model {
   static get hidden() {
@@ -13,6 +16,13 @@ class Question extends Model {
     return this.hasMany('App/Models/Answer')
   }
 
+  static encryptQuestionsId (questionsId) {
+    return cryptr.encrypt(JSON.stringify(questionsId))
+  }
+
+  static decryptQuestionsId (questionsIdString) {
+    return JSON.parse(cryptr.decrypt(questionsIdString))
+  }
 
   static getRandomQuestion() {
     let arr = [];

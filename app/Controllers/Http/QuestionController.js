@@ -1,21 +1,17 @@
 'use strict'
-const Cryptr = require('cryptr')
-const Env = use('Env')
+
 const Question = use('App/Models/Question')
-const APP_KEY = Env.get('APP_KEY')
-const cryptr = new Cryptr(APP_KEY)
 
 class QuestionController {
   async index({ request, response }) {
-    const questions = await Question.getRandomQuestion()
-    const encryptedString = cryptr.encrypt(JSON.stringify(questions))
+    const questionsId = Question.getRandomQuestion()
+    const encryptedQuestionsId = Question.encryptQuestionsId(questionsId)
 
-    response.send(encryptedString)
+    response.send(encryptedQuestionsId)
   }
 
   async show({ request, response, params }) {
-    const decryptedString = cryptr.decrypt(params.questionsHash)
-    const questionsArray = JSON.parse(decryptedString)
+    const questionsArray =  Question.decryptQuestionsId(params.questionsHash)
     const questions = await Question.getQuestions(questionsArray)
 
     response.send(questions)
