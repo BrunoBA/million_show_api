@@ -16,5 +16,9 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.get('/', 'QuestionController.index')
+Route.get('/questions', 'QuestionController.index')
+Route.post('/questions', 'QuestionController.store')
 Route.get('/questions/:questionsHash', 'QuestionController.show')
+
+Route.post('/users', 'UserController.store')
+Route.get('/users', 'UserController.index')
