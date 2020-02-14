@@ -1,6 +1,3 @@
-const redis = require('redis')
-const CONSTANTS_REDIS = use('App/Constants/Redis')
-
 const { ServiceProvider } = require('@adonisjs/fold')
 
 class RedisProvider extends ServiceProvider {
