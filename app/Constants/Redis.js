@@ -1,18 +1,28 @@
-const TEN_MIN = 10 * 60
-const TWENTY_MIN = 20 * 60
-const ONE_HOUR = 1 * 60 * 60
-const TWO_HOUR = 2 * 60 * 60
-const SIX_HOUR = 6 * 60 * 60
-const TWELVE_HOUR = 12 * 60 * 60
+const TIME = {
+  TEN_MIN: 10 * 60,
+  TWENTY_MIN: 20 * 60,
+  ONE_HOUR: 1 * 60 * 60,
+  TWO_HOUR: 2 * 60 * 60,
+  SIX_HOUR: 6 * 60 * 60,
+  TWELVE_HOUR: 12 * 60 * 60
+}
 
-const MATCH_TTL = TWO_HOUR
+const MATCH = {
+  TTL: TIME.TWO_HOUR
+}
+
+const STATUS = {
+  EXPIRED_STATUS: -2
+}
+
+const KEYS = {
+  PREFIX_USERS: 'USER:',
+  PREFIX_USER_ID: 'ID:USERS:'
+}
 
 module.exports = {
-  MATCH_TTL,
-  TEN_MIN,
-  TWENTY_MIN,
-  ONE_HOUR,
-  TWO_HOUR,
-  SIX_HOUR,
-  TWELVE_HOUR
+  TIME,
+  MATCH,
+  STATUS,
+  KEYS
 }

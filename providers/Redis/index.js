@@ -1,5 +1,5 @@
 const redis = require('redis')
-const CONSTANTS_REDIS = use('App/Constants/Redis')
+const REDIS = use('App/Constants/Redis')
 
 class Redis {
   constructor(Config) {
@@ -15,21 +15,20 @@ class Redis {
     return Redis
   }
 
-  getUsersKeys(QUESTION_HASH) {
-    return new Promise(resolve => this.get().keys(`USER:${QUESTION_HASH}:*`, (error, success) => {
+  getUsersKeys(questionId) {
+    return new Promise(resolve => this.get().keys(`${REDIS.KEYS.PREFIX_USERS}${questionId}:*`, (error, success) => {
       resolve(success)
     }))
   }
 
-  async getUsers(QUESTION_HASH) {
-    const keys = await this.getUsersKeys(QUESTION_HASH)
+  async getUsers(questionId) {
+    const keys = await this.getUsersKeys(questionId)
 
     return new Promise(resolve => {
       this.get().mget(keys, function (err, res) {
         resolve(res)
       });
     })
-
   }
 
   async addUser(questionId, username) {
@@ -44,30 +43,57 @@ class Redis {
   }
 
   formatUserHash(questionId, userId) {
-    return `USER:${questionId}:${userId}`
+    return `${REDIS.KEYS.PREFIX_USERS}${questionId}:${userId}`
   }
 
-  incrementUserCounter(questionId) {
-    const KEY = `ID:USERS:${questionId}`
+  async incrementUserCounter(questionId) {
+    const key = `${REDIS.KEYS.PREFIX_USER_ID}${questionId}`
 
-    return new Promise(resolve => this.get().incr(KEY, (error, success) => {
-      this.get().expire([KEY, CONSTANTS_REDIS.ONE_HOUR])
+    if (await this.getTtl(key) == REDIS.STATUS.EXPIRED_STATUS) {
+      const lastId = await this.getLastIdInserted(questionId)
+      return new Promise(resolve => this.get().incrby(key, lastId, async (error, success) => {
+        await this.updateTtlUser(key, REDIS.TIME.ONE_HOUR)
+        resolve(success)
+      }))
+    }
+
+    return new Promise(resolve => this.get().incr(key, async (error, success) => {
+      await this.updateTtlUser(key, REDIS.TIME.ONE_HOUR)
       resolve(success)
     }))
   }
 
   async deleteUser(questionId, userId) {
-    const KEY = this.formatUserHash(questionId, userId)
+    const key = this.formatUserHash(questionId, userId)
 
     return new Promise(resolve => {
-      this.get().del(KEY, (error, success) => {
+      this.get().del(key, (error, success) => {
         resolve(success)
       })
     })
   }
 
-  updateTtlUser(userHash, TTL = CONSTANTS_REDIS.TWENTY_MIN) {
-    this.get().expire(userHash, TTL)
+  updateTtlUser(userHash, ttl = REDIS.TIME.TWENTY_MIN) {
+    return new Promise(resolve => {
+      this.get().expire(userHash, ttl, () => {
+        resolve()
+      })
+    })
+  }
+
+  getTtl(key) {
+    return new Promise(resolve => {
+      this.get().ttl(key, (error, success) => {
+        resolve(success)
+      })
+    })
+  }
+
+  async getLastIdInserted(questionId) {
+    const userKeys = await this.getUsersKeys(questionId)
+    const arrayKeys = userKeys.map(key => parseInt(key.split(":")[2]))
+
+    return Math.max.apply(Math, arrayKeys) + 1
   }
 }
 
