@@ -1,26 +1,18 @@
 'use strict'
 
-const User = use('App/Models/User')
-const CONSTANTS_REDIS = use('App/Constants/Redis')
 const Pusher = require('pusher')
 const Env = use('Env')
-const Redis = require('redis')
+const Redis = use('Redis')
 
 class UserController {
   async store({ request, response, params }) {
     try {
       const data = request.only(['username', 'questionId'])
       const QUESTION_ID = data.questionId
-
       const QUESTION_HASH = `QUESTION-${QUESTION_ID}`
-      const client = Redis.createClient(Env.get('REDIS_PORT'), Env.get('REDIS_HOST'))
 
-      client.rpush([QUESTION_HASH, data.username])
-      client.expire([QUESTION_HASH, CONSTANTS_REDIS.MATCH_TTL])
-
-      const users = await new Promise(resolve => {
-        client.lrange(QUESTION_HASH, 0, -1, (err, reply) => resolve(reply));
-      })
+      Redis.addUser(QUESTION_HASH, data)
+      const users = await Redis.getUsers(QUESTION_HASH)
 
       const pusher = new Pusher({
         appId: Env.get('PUSHER_APP_ID'),
@@ -30,7 +22,7 @@ class UserController {
         encrypted: true
       })
 
-      pusher.trigger('room-id', 'new-user', { users })
+      pusher.trigger(`room-${QUESTION_ID.slice(0,4)}`, 'new-user', { users })
 
       response.send({ data: { username: data.username, id: users.length - 1 }, status: 200 })
     } catch (error) {
@@ -40,14 +32,11 @@ class UserController {
   }
 
   async index({ request, response }) {
+
     try {
       const query = request.get()
       const QUESTION_HASH = `QUESTION-${query.questionId}`
-      const client = Redis.createClient(Env.get('REDIS_PORT'), Env.get('REDIS_HOST'))
-      const users = await new Promise(resolve => {
-        client.lrange(QUESTION_HASH, 0, -1, (err, reply) => resolve(reply));
-      })
-
+      const users = await Redis.getUsers(QUESTION_HASH)
       response.send({ data: users, status: 200 })
     } catch (error) {
       console.log(error)
