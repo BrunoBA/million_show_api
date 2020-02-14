@@ -4,13 +4,14 @@ const User = use('App/Models/User')
 const CONSTANTS_REDIS = use('App/Constants/Redis')
 const Pusher = require('pusher')
 const Env = use('Env')
-const Redis = require('redis');
+const Redis = require('redis')
 
 class UserController {
   async store({ request, response, params }) {
     try {
       const data = request.only(['username', 'questionId'])
       const QUESTION_ID = data.questionId
+
       const QUESTION_HASH = `QUESTION-${QUESTION_ID}`
       const client = Redis.createClient(Env.get('REDIS_PORT'), Env.get('REDIS_HOST'))
 
@@ -31,7 +32,7 @@ class UserController {
 
       pusher.trigger('room-id', 'new-user', { users })
 
-      response.send({ data: data.username, status: 200 })
+      response.send({ data: { username: data.username, id: users.length - 1 }, status: 200 })
     } catch (error) {
       console.log(error)
       response.send({ data: null, status: 500 })
@@ -52,7 +53,14 @@ class UserController {
       console.log(error)
       response.send({ data: null, status: 500 })
     }
+  }
 
+  async destroy({ request, response }) {
+    try {
+      response.send({ data: true, status: 200 })
+    } catch (error) {
+      response.send({ data: null, status: 500 })
+    }
   }
 }
 
