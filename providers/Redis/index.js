@@ -47,7 +47,7 @@ class Redis {
   }
 
   async incrementUserCounter(questionId) {
-    const key = `${REDIS.KEYS.PREFIX_USER_ID}${questionId}`
+    const key = this.formatUserIdKey(questionId)
     const ttl = await this.getTtl(key)
     const userKeys = await this.getUsersKeys(questionId)
 
@@ -95,6 +95,20 @@ class Redis {
     const arrayKeys = userKeys.map(key => parseInt(key.split(":")[2]))
 
     return Math.max.apply(Math, arrayKeys) + 1
+  }
+
+  formatUserIdKey(questionId) {
+    return `${REDIS.KEYS.PREFIX_USER_ID}${questionId}`
+  }
+
+  clearKey(key) {
+    const formatedKey = this.formatUserIdKey(key)
+
+    return new Promise(resolve => {
+      this.get().del(formatedKey, (error, success) => {
+        resolve(success)
+      })
+    })
   }
 }
 

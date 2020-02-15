@@ -35,7 +35,12 @@ class UserController {
       const deleted = !!await Redis.deleteUser(questionId, params.id)
 
       if (deleted) {
-        const users = await Redis.getUsers(questionId)
+        const users = await Redis.getUsers(questionId) || []
+
+        if (users.length == 0) {
+          await Redis.clearKey(questionId)
+        }
+
         Pusher.notifyQuestion(`room-${questionId.slice(0, 4)}`, 'new-user', { users })
       }
 
