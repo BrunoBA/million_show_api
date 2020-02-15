@@ -48,15 +48,16 @@ class Redis {
 
   async incrementUserCounter(questionId) {
     const key = `${REDIS.KEYS.PREFIX_USER_ID}${questionId}`
+    const ttl = await this.getTtl(key)
+    const userKeys = await this.getUsersKeys(questionId)
 
-    if (await this.getTtl(key) == REDIS.STATUS.EXPIRED_STATUS) {
+    if (ttl == REDIS.STATUS.EXPIRED && userKeys.length > 0) {
       const lastId = await this.getLastIdInserted(questionId)
       return new Promise(resolve => this.get().incrby(key, lastId, async (error, success) => {
         await this.updateTtlUser(key, REDIS.TIME.ONE_HOUR)
         resolve(success)
       }))
     }
-
     return new Promise(resolve => this.get().incr(key, async (error, success) => {
       await this.updateTtlUser(key, REDIS.TIME.ONE_HOUR)
       resolve(success)

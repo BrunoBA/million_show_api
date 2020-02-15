@@ -12,7 +12,7 @@ const MATCH = {
 }
 
 const STATUS = {
-  EXPIRED_STATUS: -2
+  EXPIRED: -2
 }
 
 const KEYS = {
