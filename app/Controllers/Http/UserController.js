@@ -10,7 +10,7 @@ class UserController {
       const user = await Redis.addUser(questionId, username)
       const users = await Redis.getUsers(questionId)
 
-      Pusher.notifyQuestion(`room-${questionId.slice(0, 4)}`, 'new-user', { users })
+      Pusher.notify(`room-${questionId.slice(0, 4)}`, 'new-user', { users })
 
       response.send({ data: { username: user.username, id: user.id }, status: 200 })
     } catch (error) {
@@ -41,12 +41,30 @@ class UserController {
           await Redis.clearKey(questionId)
         }
 
-        Pusher.notifyQuestion(`room-${questionId.slice(0, 4)}`, 'new-user', { users })
+        Pusher.notify(`room-${questionId.slice(0, 4)}`, 'new-user', { users })
       }
 
       response.send({ data: deleted, status: 200 })
     } catch (error) {
       response.send({ data: error.message, status: 500 })
+    }
+  }
+
+  async ready({ request, response, params }) {
+    try {
+      const userId = params.id
+      const { questionId } = request.only(['questionId'])
+      const isReady = await Redis.setUserLikeReady(questionId, userId)
+      const users = await Redis.getUsers(questionId) || []
+      const usersReady = await Redis.getQuantityOfUsersReady(questionId)
+
+      if (users.length == usersReady) {
+        Pusher.notify(`room-${questionId.slice(0, 4)}`, 'show-questions', {})
+      }
+
+      response.send({ data: isReady == 1, status: 200 })
+    } catch (error) {
+      response.send({ data: isReady == 1, status: 500 })
     }
   }
 }

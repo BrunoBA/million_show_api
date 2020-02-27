@@ -17,7 +17,8 @@ const STATUS = {
 
 const KEYS = {
   PREFIX_USERS: 'USER:',
-  PREFIX_USER_ID: 'ID:USERS:'
+  PREFIX_USER_ID: 'ID:USERS:',
+  PREFIX_READY: 'READY:'
 }
 
 module.exports = {

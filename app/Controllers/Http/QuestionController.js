@@ -14,11 +14,21 @@ class QuestionController {
   }
 
   async show({ request, response, params }) {
+    try {
+      const questionsArray = Question.decryptQuestionsId(params.questionsHash)
+      const questions = await Question.getQuestions(questionsArray)
+      const resp = {
+        status: 200,
+        data: questions
+      }
 
-    const questionsArray = Question.decryptQuestionsId(params.questionsHash)
-    const questions = await Question.getQuestions(questionsArray)
-
-    response.send(questions)
+      response.send(resp)
+    } catch (error) {
+      response.send({
+        status: 500,
+        data: null
+      })
+    }
   }
 
   async store({ request, response }) {
@@ -33,7 +43,7 @@ class QuestionController {
     } catch (error) {
       response.send({
         status: 500,
-        data:  null
+        data: null
       })
     }
   }

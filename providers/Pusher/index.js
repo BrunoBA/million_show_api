@@ -16,7 +16,7 @@ class Pusher {
     return p
   }
 
-  notifyQuestion(channel, event, payload) {
+  notify(channel, event, payload) {
     this.get().trigger(channel, event, payload)
   }
 }

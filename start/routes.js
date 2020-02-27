@@ -22,4 +22,5 @@ Route.get('/questions/:questionsHash', 'QuestionController.show')
 
 Route.post('/users', 'UserController.store')
 Route.get('/users', 'UserController.index')
+Route.post('/users/:id/ready', 'UserController.ready')
 Route.delete('/users/:id', 'UserController.destroy')
